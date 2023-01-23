@@ -6,7 +6,7 @@ This Fuse will generate an independent Text+ node. The new Text+ node is already
 <img src="https://github.com/Tida-Support/Character-Style-Shaper-Fuse-for-BMD-Fusion/blob/main/CharacterStyleShaperFuseControls.png" width="400">
 
 ## Video
-https://www.youtube.com/watch?v=wpKXsdlYkKQ
+[![Curved Arrow](https://img.youtube.com/vi/wpKXsdlYkKQ/0.jpg)](https://www.youtube.com/watch?v=wpKXsdlYkKQ)
 ## Dicussion
 https://www.steakunderwater.com/wesuckless/viewtopic.php?t=5509
 ## Installation
