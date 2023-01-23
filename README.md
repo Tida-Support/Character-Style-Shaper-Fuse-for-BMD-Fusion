@@ -1,6 +1,7 @@
 # Character Style Shaper Fuse for Blackmagic Fusion
 ## Features
 This Fuse will generate an independent Text+ node. The Text+ node is already filled with data which is given by this Fuse. Each character of the Text has its unique Value which influences the shape of the complete Line of the Text.
+![Controls](https://github.com/Tida-Support/Character-Style-Shaper-Fuse-for-BMD-Fusion/blob/main/CharacterSyleShaperControls.png)
 ## Video
 https://www.youtube.com/watch?v=wpKXsdlYkKQ
 ## Installation
