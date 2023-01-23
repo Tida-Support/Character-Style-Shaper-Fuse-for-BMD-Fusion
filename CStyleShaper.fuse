@@ -1,0 +1,340 @@
+--[[
+
+--]]
+
+version = "Character Style Shaper v0.02 - 31st May 2022"
+
+-------------------------------------------------------------------
+-------------------------------------------------------------------
+	
+
+FuRegisterClass("CStyleShaper", CT_Tool, {
+	REGS_Category       = "Miscellaneous",
+	REGS_OpIconString   = "SpS",
+	REGS_OpDescription  = "Shapes Text Characters via Spline Contour",
+	REGS_Name           = "Character Style Shaper",
+	REG_OpNoMask = true,
+	REG_NoBlendCtrls = true,
+	REG_NoObjMatCtrls = true,
+	REG_NoMotionBlurCtrls = true,
+	REG_NoPreCalcProcess = true,		
+	REGS_Company 		= "Tida",
+	REGS_URL 			= "",
+	REGS_HelpTopic      = "",
+	REG_Fuse_NoEdit     = false,
+	REG_Fuse_NoReload   = false,
+	REG_Version			= 003,
+	})	
+-------------------------------------------------------------------
+
+
+
+	
+function MakeRGBA(r,g,b,a)
+	return ((((a or 1) * 255)*256 + r*255)*256 + g*255)*256 + b*255
+end
+	
+function Create()	
+	InTxTLabel = self:AddInput("ACTIVATE by assigning to one of the Viewers", "TxTLabel", {
+		LINKID_DataType = "Text",
+		INPID_InputControl = "LabelControl",
+		INP_External = false,
+        ICD_Width = 1
+		})
+
+	InTextA = self:AddInput("TextA", "TextDataA", {
+		LINKID_DataType = "Text",
+		INPS_DefaultText = "",	
+		TEC_Lines = 1,		
+		TEC_ReadOnly = false,			
+		INPID_InputControl = "TextEditControl",
+		INP_DoNotifyChanged = false,
+		IC_NoLabel = 1,
+		})
+    
+	self:BeginControlNest("Spline", "SplineStyle", true, {})
+	    InShadingElement = self:AddInput("Shading Element", "ShadingElement", {
+		INP_Integer = true,
+		INP_Default = 1,
+		INP_MaxScale = 8,
+		INP_MaxScale = 8,
+		INP_MinScale = 1,
+		INP_MinAllowed = 1,
+		INP_MaxAllowed = 8,
+		LINKID_DataType = "Number",
+        INPID_InputControl ="ScrewControl",
+    })	
+
+
+	InType = self:AddInput("Type", "InType", {
+		LINKID_DataType = "Number",
+		INPID_InputControl = "ComboControl",
+		INP_Default = 25	,
+		INP_Integer = true,
+
+		{ CCS_AddString = "Size", },  -- 102      
+        { CCS_AddString = "Spacing", }, -- 1300
+		
+		{ CCS_AddString = "Opacity", },  -- 2600  
+		{ CCS_AddString = "Extend Horizontal", },  -- 2301 
+		{ CCS_AddString = "Extend Vertical", },  -- 2302
+
+		{ CCS_AddString = "Red", },  -- 2401 
+		{ CCS_AddString = "Green", },  -- 2402 
+		{ CCS_AddString = "Blue", },  -- 2403
+		{ CCS_AddString = "Alpha", },  -- 2404 		
+		
+		{ CCS_AddString = "X Softness", }, -- 2500  
+		{ CCS_AddString = "Y Softness", }, -- 2501
+		{ CCS_AddString = "Glow Softness", }, -- 2503
+		{ CCS_AddString = "Blend Softness", }, -- 2504
+
+		{ CCS_AddString = "X Offset", }, -- 2710
+		{ CCS_AddString = "Y Offset", }, -- 2711
+		{ CCS_AddString = "Z Offset", }, -- 2712
+
+
+
+		{ CCS_AddString = "X Pivot", }, -- 1310 / 2720 /
+		{ CCS_AddString = "Y Pivot", }, -- 1311 / 2721 /
+		{ CCS_AddString = "Z Pivot", }, -- 1312 / 2722 /
+
+		{ CCS_AddString = "X Rot", }, -- 1320 / 2730 /
+		{ CCS_AddString = "Y Rot", }, -- 1321 / 2731 /
+		{ CCS_AddString = "Z Rot", }, -- 1322 /2732 /
+
+		{ CCS_AddString = "X Shear", }, -- 1330 / 2740 /
+		{ CCS_AddString = "Y Shear", }, -- 1331 / 2741 /
+
+		{ CCS_AddString = "X Size", }, -- 1340 / 2750 /
+		{ CCS_AddString = "Y Size", }, -- 1341 / 2751 /
+
+		ICD_Width = 1,			
+		INP_DoNotifyChanged = true,	
+       })	
+	InBoolSphere = self:AddInput("Sphere lat", "Sphere", {
+		LINKID_DataType = "Number",
+		INPID_InputControl = "CheckboxControl",
+		INP_Integer = true,
+		INP_Default = 0,
+		INP_DoNotifyChanged = true,			
+		})
+	InBoolHalfSphere = self:AddInput("Half lat", "HalfSphere", {
+		LINKID_DataType = "Number",
+		INPID_InputControl = "CheckboxControl",
+		INP_Integer = true,
+		INP_Default = 0,			
+		})
+    InMaxX = self:AddInput("Max X", "MaxX", {
+		INP_Integer = true,
+		INP_Default = 1,
+		INP_MaxScale = 10,
+		INP_MinScale = 1,
+		INP_MinAllowed = 1,
+		LINKID_DataType = "Number",
+        INPID_InputControl ="ScrewControl",
+    })
+    InMaxY = self:AddInput("Max Y", "MaxY", {
+		INP_Integer = false,
+		INP_Default = 1,
+		INP_MaxScale = 1,
+		INP_MinScale = 0,
+		LINKID_DataType = "Number",
+        INPID_InputControl ="ScrewControl",
+    })
+	InSpline = self:AddInput("Spline", "Spline", {
+		LINKID_DataType = "LookUpTable",
+		INPID_InputControl = "SplineControl",
+		INPID_AddModifier = "LUTBezier",
+		ICS_Name = "",
+		SPC_SplineColor = MakeRGBA(0.8,1,0.6, .8),
+		SPC_Show = true,
+		SPC_HorizontalGridLines = 5,
+		SPC_VerticalGridLines = 3,
+		SPC_BarSize = 1,
+		SPC_Margin = 5,
+		SPCD_Height = 1,
+		SPC_ShowInOut = true,
+		})
+    self:EndControlNest()
+	self:BeginControlNest("Code", "Code", true, {})
+	InAddStyle = self:AddInput("", "AddStyle", {
+		LINKID_DataType = "Number",
+		INPID_InputControl = "MultiButtonControl",
+		INP_Default = 0.0,
+		INP_Integer = true,
+		INP_DoNotifyChanged = true,
+		INP_External = false,
+		MBTNC_ForceButtons =    true,
+		INP_MinScale        = 0,
+		INP_MaxScale        = 4,
+		INP_MinAllowed      = 0,
+		INP_MaxAllowed      = 4,
+        ICD_Width = 0.5,
+		MBTNC_ShowBasicButton = true,
+		MBTNC_StretchToFit = true,
+		MBTNC_ShowToolTip = true,
+		{ MBTNC_AddButton = "none", MBTNCD_ButtonWidth = 0, },
+		{ MBTNC_AddButton = "Add",MBTNCD_ButtonWidth = 1, },
+	})
+	InClearStyle = self:AddInput("", "ClearStyle", {
+		LINKID_DataType = "Number",
+		INPID_InputControl = "MultiButtonControl",
+		INP_Default = 0.0,
+		INP_Integer = true,
+		INP_DoNotifyChanged = true,
+		INP_External = false,
+		MBTNC_ForceButtons =    true,
+		INP_MinScale        = 0,
+		INP_MaxScale        = 4,
+		INP_MinAllowed      = 0,
+		INP_MaxAllowed      = 4,
+        ICD_Width = 0.5,
+		MBTNC_ShowBasicButton = true,
+		MBTNC_StretchToFit = true,
+		MBTNC_ShowToolTip = true,
+		{ MBTNC_AddButton = "none", MBTNCD_ButtonWidth = 0, },
+		{ MBTNC_AddButton = "Clear",MBTNCD_ButtonWidth = 1, },
+	})
+
+		
+	InTextC = self:AddInput("TextC", "TextDataC", {
+		LINKID_DataType = "Text",
+		INPS_DefaultText = "",	
+		TEC_Lines = 25,		
+		TEC_ReadOnly = false,			
+		INPID_InputControl = "TextEditControl",
+		INP_DoNotifyChanged = false,
+		IC_NoLabel = 1,
+        --ICS_ControlPage = "Code",
+		})
+    self:EndControlNest()
+
+	InTextB = self:AddInput("TextB", "TextDataB", {
+		LINKID_DataType = "Text",
+		INPS_DefaultText = "",	
+		TEC_Lines = 25,		
+		TEC_ReadOnly = false,			
+		INPID_InputControl = "TextEditControl",
+		INP_DoNotifyChanged = false,
+		IC_NoLabel = 1,
+        IC_Visible = true,
+		ICS_ControlPage = "Position",
+		})
+		
+	InLabel = self:AddInput(version, "version", {
+		LINKID_DataType = "Text",
+		INPID_InputControl = "LabelControl",
+		INP_External = false,
+		INP_Passive = true,
+		})
+		
+	OutImage = self:AddOutput("Output", "Output", {
+		LINKID_DataType = "Image",
+		LINK_Main = 1,
+		})	
+end
+		
+function NotifyChanged(inp, param, time)
+	if inp ~= nil and param ~= nil then
+		if inp == InBoolSphere then
+			InBoolHalfSphere:SetAttrs({ IC_Visible = true, })
+			InMaxX:SetAttrs({ IC_Visible = false, })
+			InSpline:SetAttrs({ IC_Visible = false, })	
+			
+			if param.Value == 0 then 				
+				InBoolHalfSphere:SetAttrs({ IC_Visible = false, })
+				InMaxX:SetAttrs({ IC_Visible = true, })		
+				InSpline:SetAttrs({ IC_Visible = true, })			
+			end
+		end
+	end
+end
+
+
+function Process(req)
+    local imgattrs = {
+        IMG_Document = self.Comp,
+        { IMG_Channel = "Red", },
+        { IMG_Channel = "Green", },
+        { IMG_Channel = "Blue", },
+        { IMG_Channel = "Alpha", },
+        IMG_Width = Width,
+        IMG_Height = Height,
+        IMG_XScale = XAspect,
+        IMG_YScale = YAspect,
+        IMAT_OriginalWidth = Width,
+        IMAT_OriginalHeight = Height,
+        IMG_Quality = not req:IsQuick(),
+        IMG_MotionBlurQuality = not req:IsNoMotionBlur(),
+    }
+	
+	local img = Image(imgattrs)
+	local p = Pixel({R=0,G=0,B=0,A=0})	
+	img:Fill(p)
+	local dst = Image{ IMG_Like = img, IMG_DeferAlloc = true }
+    local MaxX = InMaxX:GetValue(req).Value
+    local MaxY = InMaxY:GetValue(req).Value
+	local lut = InSpline:GetValue(req)
+	local bAddStyle = InAddStyle:GetValue(req).Value
+    local bClearStyle = InClearStyle:GetValue(req).Value
+    local type = InType:GetValue(req).Value
+    local TextA = InTextA:GetValue(req).Value
+    local TextB = InTextB:GetValue(req).Value
+	local IndexS = InShadingElement:GetValue(req).Value - 1
+	local BoolSphere = InBoolSphere:GetValue(req).Value
+	local BoolHalfSphere = InBoolHalfSphere:GetValue(req).Value
+
+	lb_str = "Text Length: "..(string.format("%g",tostring(string.len(TextA))))
+	InTxTLabel:SetAttrs({LINKS_Name = lb_str,LBLC_LabelColor = 2,}) 
+ 
+    if bClearStyle == 1 then
+        InClearStyle:SetSource(Number(0),0)
+        InTextB:SetSource(Text(""),0)
+        InTextC:SetSource(Text(""),0)
+    end
+
+	if bAddStyle == 1 then
+        lenA = string.len(TextA)
+        strCode1 = "{\n\tTools = ordered() {\n\t\tText = TextPlus {\n\t\t\tInputs = {\n\t\t\t\tUseFrameFormatSettings = Input { Value = 1, },\n\t\t\t\tStyledText = Input {\n\t\t\t\t\tSourceOp = \"CharacterLevelStyling\",\n\t\t\t\t\tSource = \"StyledText\",\n\t\t\t\t},\n\t\t\t},\n\t\t},\n\t\tCharacterLevelStyling = StyledTextCLS {\n\t\t\tInputs = {\n\t\t\t\tText = Input { Value = \""
+        strCode2 = "\", },\n\t\t\t\t\tCharacterLevelStyling = Input {\n\t\t\t\t\tValue = StyledText {\n\t\t\t\t\t\tArray = {\n"
+        strCode3 = "\n\t\t\t\t\t\t}\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t},\n\t}\n\t},\n\tActiveTool = \"Text\"\n} "
+        strType = {102,1300,2600,2301,2302,2401,2402,2403,2404,2500,2501,2503,2504,2710,2711,2712,2720,2721,2722,2730,2731,2732,2740,2741,2750,2751}
+        strT = tostring(strType[type+1]) 
+        InAddStyle:SetSource(Number(0),0)
+        local txtB = ""   
+        local txtA = ""     
+        for i = 0, lenA-1 do
+            x = i/lenA * MaxX
+            
+			if BoolSphere == 0 then
+				y = lut:GetValue(x) * MaxY
+			else
+				x = (i+1)/(lenA+1) * MaxX
+				if BoolHalfSphere == 1 then
+					y = 1/math.cos(x*3.1415*0.5) * MaxY
+				else
+					x1 = math.sin((x)*3.1415)
+					if x1 == 0 then x1=0.1 end
+					y = 1/x1 * MaxY
+				end
+			end
+
+            -- 	{ 2751, 248, 248, Value = 1 },
+            s = "\t\t\t\t\t\t{ "..strT..", "..i..","..i..", Index = "..IndexS..", Value = "..y.." },"
+            txtA = txtA.."-"
+            txtB = txtB..s.."\n"
+        end
+        txtB = TextB..txtB
+        InTextB:SetSource(Text(tostring(txtB)),0)
+        local strC = tostring(strCode1..tostring(TextA)..strCode2..tostring(txtB)..strCode3)
+		InTextC:SetSource(Text(strC),0)
+
+		bmd.setclipboard(strC)
+		local comp = fusion.CurrentComp
+    end
+
+	--local outval = lut:GetValue(tRateOut*tStretch) * tEnd
+		
+	OutImage:Set(req, dst)
+end
